@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="db:/ingest">
+        <expression-component doc:name="Add sips as source"><![CDATA[if (flowVars.sources == null) {
+	flowVars.sources = new java.util.ArrayList();
+}
+
+if (!flowVars.sources.contains("sips")) {
+	flowVars.sources.add("sips");
+}]]></expression-component>
+        <db:select config-ref="Sips" doc:name="Database">
+            <db:dynamic-query><![CDATA[SELECT sips.local_id, sips.md5, sips.organisation, sips.filename, sips.archive_status, sips.pid, sips.comment, sips.last_event_date, sips.preingest_status,
+count(*) OVER() AS full_count
+FROM sips sips
+WHERE sips.organisation_id LIKE #["'" + flowVars.organisation_id + "'"]
+AND sips.organisation_id IN(#["'" +org.apache.commons.lang3.StringUtils.join(flowVars.authorised_organisations, "','") + "'"])
+AND local_id LIKE #["'" + flowVars.local_id + "'"]
+AND md5 LIKE #["'" + flowVars.md5 + "'"]
+AND organisation LIKE #["'" + flowVars.organisation + "'"]
+AND filename LIKE #["'" + flowVars.filename + "'"]
+AND archive_status LIKE #["'" + flowVars.archive_status + "'"]
+AND pid LIKE #["'" + flowVars.pid + "'"]
+AND comment LIKE #["'" + flowVars.comment + "'"]
+AND preingest_status LIKE #["'" + flowVars.preingest_status + "'"]
+AND sips.last_event_date >= #["'" + flowVars.from + "'"]
+AND sips.last_event_date < #["'" + flowVars.until + "'"]
+ORDER BY sips.last_event_date DESC
+OFFSET #[flowVars.startIndex]
+LIMIT #[flowVars.nrOfResults];]]></db:dynamic-query>
+        </db:select>
+        <choice doc:name="Returned any results?">
+            <when expression="#[payload.size() &gt; 0]">
+                <set-variable variableName="total" value="#[payload[0].full_count]" doc:name="Set total"/>
+            </when>
+            <otherwise>
+                <expression-component doc:name="Do nothing"><![CDATA[// Do nothing]]></expression-component>
+            </otherwise>
+        </choice>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map {
+	($ - "full_count")
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    
+        <flow name="db:/ingest/{id}">
+        <expression-component doc:name="Add sips as source"><![CDATA[if (flowVars.sources == null) {
+	flowVars.sources = new java.util.ArrayList();
+}
+
+if (!flowVars.sources.contains("sips")) {
+	flowVars.sources.add("sips");
+}]]></expression-component>
+        <db:select config-ref="Sips" doc:name="Database">
+            <db:dynamic-query><![CDATA[SELECT *
+FROM events
+WHERE (local_id = #["'" + flowVars.id + "'"] OR local_id IN(SELECT local_id FROM events WHERE pid = #["'" + flowVars.id + "'"]))
+AND organisation_id LIKE #["'" + flowVars.organisation_id + "'"]
+AND organisation_id IN(#["'" +org.apache.commons.lang3.StringUtils.join(flowVars.authorised_organisations, "','") + "'"])
+ORDER BY date DESC;]]></db:dynamic-query>
+        </db:select>
+        <flow-ref name="checkResults" doc:name="checkResults"/>
+    </flow>
+</mule>

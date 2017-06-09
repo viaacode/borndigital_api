@@ -1,0 +1,56 @@
+#%RAML 1.0 Trait
+responses: 
+  200:
+    body:
+      application/json:
+        example: | 
+          {
+            "header": {
+              "timestamp": 1484308858129,
+              "path": "/api<<resourcePath>>",
+              "description": "<<description>>",
+              "status": "success",
+              "statuscode": 200,
+              "message": "",
+              "sources": [
+                "MAM"
+              ]
+            },
+            <<example200>>
+          }
+  404:
+    body:
+      application/json:
+        example: |
+          {
+            "header": {
+              "timestamp": 1484308858129,
+              "path": "/api/ingest<<resourcePath>>",
+              "description": "<<description>>",
+              "status": "failed",
+              "statuscode": 404,
+              "message": "The resource was not found",
+              "sources": [
+                "MAM"
+              ]
+            },
+            "data": []
+          }
+  500:
+    body:
+      application/json:
+        example: |
+          {
+            "header": {
+              "timestamp": 1484308858129,
+              "path": "/api<<resourcePath>>",
+              "description": "<<description>>",
+              "status": "failed",
+              "statuscode": 500,
+              "message": "Some error occurred",
+              "sources": [
+                "MAM"
+              ]
+            },
+            "data": []
+          }

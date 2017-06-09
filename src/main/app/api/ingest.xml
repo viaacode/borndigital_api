@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+<flow name="get:/ingest:api-config">
+        <expression-component doc:name="Parse startIndex"><![CDATA[if (message.inboundProperties.'http.query.params'.startIndex != null && message.inboundProperties.'http.query.params'.startIndex != "") {
+	flowVars.startIndex = java.lang.Integer.parseInt(message.inboundProperties.'http.query.params'.startIndex);
+} else {
+	flowVars.startIndex = 0;
+}]]></expression-component>
+        <expression-component doc:name="Parse nrOfResults"><![CDATA[if (message.inboundProperties.'http.query.params'.nrOfResults != null && message.inboundProperties.'http.query.params'.nrOfResults != "") {
+	flowVars.nrOfResults = java.lang.Integer.parseInt(message.inboundProperties.'http.query.params'.nrOfResults);
+} else {
+	flowVars.nrOfResults = 25;
+}]]></expression-component>
+        <flow-ref name="retrieveAuthorisedOrganisationsFromHeader" doc:name="retrieveAuthorisedOrganisationsFromHeader"/>
+        <flow-ref name="/ingest:parseParams" doc:name="/ingest:parseParams"/>
+        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id]" doc:name="Set organisation_id"/>
+        <set-variable variableName="description" value="Retrieve information about ingest" doc:name="Set description"/>
+        <flow-ref name="db:/ingest" doc:name="db:/ingest"/>
+        <dw:transform-message doc:name="output">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+lookup("create_response", payload)]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <sub-flow name="/ingest:parseParams">
+        <set-variable doc:name="Set local_id" value="#[message.inboundProperties.'http.query.params'.local_id == null || message.inboundProperties.'http.query.params'.local_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.local_id]" variableName="local_id"/>
+		<set-variable doc:name="Set md5" value="#[message.inboundProperties.'http.query.params'.md5 == null || message.inboundProperties.'http.query.params'.md5.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.md5]" variableName="md5"/>
+		<set-variable doc:name="Set organisation" value="#[message.inboundProperties.'http.query.params'.organisation == null || message.inboundProperties.'http.query.params'.organisation.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.organisation]" variableName="organisation"/>
+		<set-variable doc:name="Set filename" value="#[message.inboundProperties.'http.query.params'.filename == null || message.inboundProperties.'http.query.params'.filename.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.filename]" variableName="filename"/>
+		<set-variable doc:name="Set archive_status" value="#[message.inboundProperties.'http.query.params'.archive_status == null || message.inboundProperties.'http.query.params'.archive_status.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.archive_status]" variableName="archive_status"/>
+		<set-variable doc:name="Set pid" value="#[message.inboundProperties.'http.query.params'.pid == null || message.inboundProperties.'http.query.params'.pid.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.pid]" variableName="pid"/>
+		<set-variable doc:name="Set comment" value="#[message.inboundProperties.'http.query.params'.comment == null || message.inboundProperties.'http.query.params'.comment.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.comment]" variableName="comment"/>
+		<set-variable doc:name="Set preingest_status" value="#[message.inboundProperties.'http.query.params'.preingest_status == null || message.inboundProperties.'http.query.params'.preingest_status.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.preingest_status]" variableName="preingest_status"/>
+		<set-variable doc:name="Set from" value="#[message.inboundProperties.'http.query.params'.from == null || message.inboundProperties.'http.query.params'.from.toString().isEmpty() ? &quot;-infinity&quot; : message.inboundProperties.'http.query.params'.from.replaceAll(&quot;T&quot;, &quot; &quot;)]" variableName="from"/>
+		<set-variable doc:name="Set until" value="#[message.inboundProperties.'http.query.params'.until == null || message.inboundProperties.'http.query.params'.until.toString().isEmpty() ? &quot;infinity&quot; : message.inboundProperties.'http.query.params'.until.replaceAll(&quot;T&quot;, &quot; &quot;)]" variableName="until"/>
+    </sub-flow>
+    <flow name="get:/ingest/{id}:api-config">
+        <set-variable variableName="description" value="Get events from one sip" doc:name="Set description"/>
+        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id]" doc:name="Set organisation_id"/>
+        <flow-ref name="retrieveAuthorisedOrganisationsFromHeader" doc:name="retrieveAuthorisedOrganisationsFromHeader"/>
+        <flow-ref name="db:/ingest/{id}" doc:name="db:/ingest/{id}"/>
+        <dw:transform-message doc:name="output">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+lookup("create_response", payload)]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+
+
+</mule>

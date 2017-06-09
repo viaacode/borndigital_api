@@ -1,0 +1,153 @@
+#%RAML 0.8
+title: borndigital ingest API
+version: 1.0
+
+traits: 
+  - responses-all: !include traits/responses.raml
+  - dates: !include traits/daterange.raml
+  
+/ingest:
+  displayName: Ingest reporting
+  description: Retrieve information about ingest of organisations you are authorised to according to your certificate
+  get:
+    queryParameters: 
+      startIndex:
+        type: integer
+        required: false
+        minimum: 0
+        default: 0
+        displayName: Start Index
+        description: Index to start at
+      nrOfResults:
+        type: integer
+        required: false
+        default: 25
+        minimum: 0
+        displayName: Number of results
+        description: Number of results to return
+      local_id:
+        type: string
+        required: false
+        displayName: Local ID
+        description: The local_id of the sip
+      md5:
+        type: string
+        required: false
+        minLength: 32
+        maxLength: 32
+        pattern: "[a-z0-9]{32}"
+        displayName: MD5
+        description: The MD5 of the sip
+      organisation:
+        type: string
+        required: false
+        displayName: Organisation
+        description: The organisation name this sip belongs to
+      filename:
+        type: string
+        required: false
+        displayName: Filename
+        description: The filename of the sip
+      archive_status:
+        type: string
+        required: false
+        displayName: Archive status
+        description: The archive status of the sip
+        enum: ['OK', 'NOK', 'in_progress']
+      pid:
+        type: string
+        required: false
+        displayName: PID
+        description: The PID of the sip
+      comment:
+        type: string
+        required: false
+        displayName: Comment
+        description: The comment of the sip
+      preingest_status:
+        type: string
+        required: false
+        displayName: Pre-ingest status
+        description: The pre-ingest status of the sip
+        enum: ['OK', 'NOK', 'TODO', 'in_progress']
+      from:
+        type: string
+        required: false
+        default: "-infinity"
+        example: "2017-04-06T11:30:38"
+        displayName: From
+        description: Query from last_event_date
+      until:
+        type: string
+        required: false
+        default: "infinity"
+        example: "2017-04-06T23:30:38"
+        displayName: Until
+        description: Query until last_event_date
+    is: [responses-all: {
+        example200: '"data": [
+          {
+          "last_event_date": "2017-04-20T16:56:27",
+          "local_id": "123",
+          "comment": "Met succes verstuurd naar ingestfolder MAM",
+          "filename": "test123.mov",
+          "pid": "qs058c9rf3d",
+          "md5": "a5756b2e7dfd6c1584ad1d729686b471",
+          "archive_status": "in_progress",
+          "organisation": "example",
+          "preingest_status": "OK"
+        },
+        {
+          "last_event_date": "2017-04-20T15:13:06",
+          "local_id": "456",
+          "comment": "Met succes verstuurd naar ingestfolder MAM",
+          "filename": "20120927_VE_PM_OPE.mov",
+          "pid": "qs06k06xc8f",
+          "md5": "27751d32c29dffe0987ac42a30db7e36",
+          "archive_status": "in_progress",
+          "organisation": "example",
+          "preingest_status": "OK"
+        }
+          ]',
+        description: "Get all export jobs"}]
+  /{id}:
+    displayName: Single SIP
+    description: Get events from one sip
+    uriParameters: 
+      id: 
+        required: true
+        type: string
+        example: "123"
+        displayName: ID (local ID or PID)
+        description: The ID (local ID or VIAA PID) of the record
+    get:
+      is: [responses-all: {
+        example200: '"data": [
+          {
+            "outcome": "OK",
+            "type": "PI_SIP_DELIVERY",
+            "local_id": "123",
+            "organisation_id": "OR-gq6r19q",
+            "filename": "example.mp4",
+            "comment": "Message has been sent to MAM.",
+            "date": "2017-06-08T13:53:35",
+            "md5": "",
+            "pid": "qs024b2x8dt",
+            "organisation": "example",
+            "id": 2929
+          },
+          {
+            "outcome": "OK",
+            "type": "PI_MD5_CHECK",
+            "local_id": "123",
+            "organisation_id": "OR-gq6r19q",
+            "filename": "example.mp4",
+            "comment": "MD5: 27751d32c29dffe0987ac42a30db7e36",
+            "date": "2017-06-07T15:21:47",
+            "md5": "27751d32c29dffe0987ac42a30db7e36",
+            "pid": "UNKNOWN",
+            "organisation": "example",
+            "id": 9555
+          }
+          ]',
+        description: "Get events of a certain item"}]
