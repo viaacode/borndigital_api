@@ -49,3 +49,5 @@ curl --key viaa_ingest.key --cert viaa_ingest.crt "https://api-qas.viaa.be/inges
 
 Documentatie kan opgevraagd worden via https://api.viaa.be/ingest/console (productie-omgeving) of https://api-qas.viaa.be/ingest/console (test-omgeving).
 Let op: hiervoor moeten vorige stappen doornomen geweest zijn.
+
+Voorbeeld request: https://api-qas.viaa.be/ingest?startIndex=0&nrOfResults=10&local_id=123&md5=11111111111111111111111111111111&organisation=Voorbeeld&archive_status=OK&pid=123&from=2017-04-06T11%3A30%3A38&until=2017-04-06T23%3A30%3A38
