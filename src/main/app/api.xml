@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cors="http://www.mulesoft.org/schema/mule/cors" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cors="http://www.mulesoft.org/schema/mule/cors" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.mulesoft.org/schema/mule/cors http://www.mulesoft.org/schema/mule/cors/current/mule-cors.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
-    <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="${api.port}" doc:name="HTTP Listener Configuration"/>
-    <apikit:config name="api-config" raml="api.raml" consoleEnabled="false" doc:name="Router"/>
+    <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="${api.port}" protocol="HTTPS" doc:name="HTTP Listener Configuration">
+        <tls:context>
+            <tls:key-store path="keystore.jks" password="password" keyPassword="password"/>
+        </tls:context>
+    </http:listener-config>
+    <apikit:config name="api-config" raml="api.raml" consoleEnabled="true" doc:name="Router" consolePath="ingest/console"/>
     <cors:config name="Cors_Configuration" doc:name="Cors Configuration">
 	    <cors:origins>
 	        <cors:origin url="*">
@@ -21,18 +27,19 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 	    </cors:origins>
 	</cors:config>
     <flow name="api-main">
-        <http:listener config-ref="api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
+        <http:listener config-ref="api-httpListenerConfig" path="/*" doc:name="HTTP"/>
         <cors:validate config-ref="Cors_Configuration" publicResource="false" acceptsCredentials="false" doc:name="CORS Validate" />
         <set-variable variableName="path" value="#[message.inboundProperties.'http.request.path']" doc:name="Set path"/>
         <flow-ref name="ref:getMilli" doc:name="ref:getMilli"/>
         <apikit:router config-ref="api-config" doc:name="APIkit Router"/>
         <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
     </flow>
+    <!-- 
     <flow name="api-console">
-        <http:listener config-ref="api-httpListenerConfig" path="/api/console/*" doc:name="HTTP"/>
-        <apikit:console config-ref="api-config" doc:name="APIkit Console"/>
+        <http:listener config-ref="api-httpListenerConfig" path="/api/ingest/console/*" doc:name="HTTP"/>
+        <apikit:console config-ref="api-config" doc:name="APIkit Console" />
     </flow>
-    
+    -->
     <apikit:mapping-exception-strategy name="api-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
             <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
