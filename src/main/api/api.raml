@@ -44,6 +44,11 @@ traits:
         required: false
         displayName: Organisation
         description: The organisation name this sip belongs to
+      organisation_id:
+        type: string
+        required: false
+        displayName: Organisation ID (OR-ID)
+        description: The organisation ID (e.g. OR-...) this sip belongs to
       filename:
         type: string
         required: false
@@ -96,6 +101,7 @@ traits:
           "md5": "a5756b2e7dfd6c1584ad1d729686b471",
           "archive_status": "in_progress",
           "organisation": "example",
+          "organisation_id": "OR-example",
           "preingest_status": "OK"
         },
         {
@@ -107,10 +113,11 @@ traits:
           "md5": "27751d32c29dffe0987ac42a30db7e36",
           "archive_status": "in_progress",
           "organisation": "example",
+          "organisation_id": "OR-example",
           "preingest_status": "OK"
         }
           ]',
-        description: "Get all export jobs"}]
+        description: "Get all ingested items"}]
   /{id}:
     displayName: Single SIP
     description: Get events from one sip
