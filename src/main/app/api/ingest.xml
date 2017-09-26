@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 <flow name="get:/ingest:api-config">
         <expression-component doc:name="Parse startIndex"><![CDATA[if (message.inboundProperties.'http.query.params'.startIndex != null && message.inboundProperties.'http.query.params'.startIndex != "") {
 	flowVars.startIndex = java.lang.Integer.parseInt(message.inboundProperties.'http.query.params'.startIndex);
@@ -21,7 +22,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 }]]></expression-component>
         <flow-ref name="retrieveAuthorisedOrganisationsFromHeader" doc:name="retrieveAuthorisedOrganisationsFromHeader"/>
         <flow-ref name="/ingest:parseParams" doc:name="/ingest:parseParams"/>
-        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.organisation_id == null || message.inboundProperties.'http.query.params'.organisation_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.organisation_id]" doc:name="Set organisation_id"/>
+        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.organisation_id == null || message.inboundProperties.'http.query.params'.organisation_id.toString().isEmpty() ?  (message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id ) : message.inboundProperties.'http.query.params'.organisation_id)]" doc:name="Set organisation_id"/>
         <set-variable variableName="description" value="Retrieve information about ingest" doc:name="Set description"/>
         <flow-ref name="db:/ingest" doc:name="db:/ingest"/>
         <dw:transform-message doc:name="output">
@@ -48,6 +49,20 @@ lookup("create_response", payload)]]></dw:set-payload>
         <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id]" doc:name="Set organisation_id"/>
         <flow-ref name="retrieveAuthorisedOrganisationsFromHeader" doc:name="retrieveAuthorisedOrganisationsFromHeader"/>
         <flow-ref name="db:/ingest/{id}" doc:name="db:/ingest/{id}"/>
+        <dw:transform-message doc:name="output">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+lookup("create_response", payload)]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="get:/ingest/status:api-config">
+        <db:select config-ref="Borndigital" doc:name="Get status">
+            <db:parameterized-query><![CDATA[select status
+from borndigital_ingest_status
+limit 1;]]></db:parameterized-query>
+        </db:select>
+        <set-payload value="#[payload[0].status]" doc:name="Set Payload with status"/>
         <dw:transform-message doc:name="output">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json

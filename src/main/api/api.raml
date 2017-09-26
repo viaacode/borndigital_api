@@ -159,3 +159,12 @@ traits:
           }
           ]',
         description: "Get events of a certain item"}]
+  /status:
+    description: Get status (OK, NOK) whether digital material may be sent to VIAA FTP
+    get:
+      description: Get status (OK, NOK) whether digital material may be sent to VIAA FTP
+      is: [responses-all: {
+            description : "OK when you may ingest. NOK to stop ingest to VIAA FTP",
+            example200 : '"data": "OK"'
+          }]
+      
