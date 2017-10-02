@@ -22,7 +22,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 }]]></expression-component>
         <flow-ref name="retrieveAuthorisedOrganisationsFromHeader" doc:name="retrieveAuthorisedOrganisationsFromHeader"/>
         <flow-ref name="/ingest:parseParams" doc:name="/ingest:parseParams"/>
-        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.organisation_id == null || message.inboundProperties.'http.query.params'.organisation_id.toString().isEmpty() ?  (message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id ) : message.inboundProperties.'http.query.params'.organisation_id)]" doc:name="Set organisation_id"/>
+        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.organisation_id == null || message.inboundProperties.'http.query.params'.organisation_id.toString().isEmpty() ?  ((message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty()) ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id ) : message.inboundProperties.'http.query.params'.organisation_id]" doc:name="Set organisation_id"/>
         <set-variable variableName="description" value="Retrieve information about ingest" doc:name="Set description"/>
         <flow-ref name="db:/ingest" doc:name="db:/ingest"/>
         <dw:transform-message doc:name="output">
@@ -46,7 +46,7 @@ lookup("create_response", payload)]]></dw:set-payload>
     </sub-flow>
     <flow name="get:/ingest/{id}:api-config">
         <set-variable variableName="description" value="Get events from one sip" doc:name="Set description"/>
-        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty() ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id]" doc:name="Set organisation_id"/>
+        <set-variable variableName="organisation_id" value="#[message.inboundProperties.'http.query.params'.organisation_id == null || message.inboundProperties.'http.query.params'.organisation_id.toString().isEmpty() ?  ((message.inboundProperties.'http.query.params'.cp_id == null || message.inboundProperties.'http.query.params'.cp_id.toString().isEmpty()) ? &quot;%&quot; : message.inboundProperties.'http.query.params'.cp_id ) : message.inboundProperties.'http.query.params'.organisation_id]" doc:name="Set organisation_id"/>
         <flow-ref name="retrieveAuthorisedOrganisationsFromHeader" doc:name="retrieveAuthorisedOrganisationsFromHeader"/>
         <flow-ref name="db:/ingest/{id}" doc:name="db:/ingest/{id}"/>
         <dw:transform-message doc:name="output">

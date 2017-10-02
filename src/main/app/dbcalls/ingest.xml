@@ -18,7 +18,7 @@ if (!flowVars.sources.contains("sips")) {
 	flowVars.sources.add("sips");
 }]]></expression-component>
         <db:select config-ref="Sips" doc:name="Database">
-        <db:dynamic-query><![CDATA[SELECT sips.local_id, sips.md5, sips.organisation, sips.organisation_id, sips.filename, sips.archive_status, sips.pid, sips.comment, sips.last_event_date, sips.preingest_status,
+            <db:dynamic-query><![CDATA[SELECT sips.local_id, sips.md5, sips.organisation, sips.organisation_id, sips.filename, sips.archive_status, sips.pid, sips.comment, sips.last_event_date, sips.preingest_status,
 count(*) OVER() AS full_count
 FROM sips sips
 WHERE sips.organisation_id LIKE #["'" + flowVars.organisation_id + "'"]
