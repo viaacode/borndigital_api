@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Configuration>
     <Appenders>
-        <RollingFile name="file" fileName="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}borndigital_ingest.log" 
-                 filePattern="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}borndigital_ingest-%i.log">
+        <RollingFile name="file" fileName="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}borndigital_api.log" 
+                 filePattern="${sys:mule.home}${sys:file.separator}logs${sys:file.separator}borndigital_api.log.%i">
             <PatternLayout pattern="%d [%t] %-5p %c - %m%n" />
             <SizeBasedTriggeringPolicy size="10 MB" />
             <DefaultRolloverStrategy max="10"/>
@@ -11,11 +11,11 @@
             <SerializedLayout />
         </Socket>
         <Rewrite name="rewrite">
-		    <AppenderRef ref="logstash"/>
-		    <PropertiesRewritePolicy>
-		        <Property name="application">BORNDIGITAL INGEST API</Property>
-		    </PropertiesRewritePolicy>
-		</Rewrite>
+            <AppenderRef ref="logstash"/>
+            <PropertiesRewritePolicy>
+                <Property name="application">BORNDIGITAL INGEST API</Property>
+            </PropertiesRewritePolicy>
+        </Rewrite>
     </Appenders>
     <Loggers>
         <!-- CXF is used heavily by Mule for web services -->
