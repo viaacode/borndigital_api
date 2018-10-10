@@ -23,7 +23,13 @@ http://www.mulesoft.org/schema/mule/oauth2 http://www.mulesoft.org/schema/mule/o
     
     
     <!-- ##### PROPERTY PLACEHOLDER ##### -->
-   	<context:property-placeholder location="${mule.env}.properties"/>
+<!--    	<context:property-placeholder location="${mule.env}.properties"/> -->
+<context:property-placeholder properties-ref="YamlPropertiesFactoryBean" />
+<spring:beans>
+  <spring:bean id="YamlPropertiesFactoryBean" name="YamlPropertiesFactoryBean" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+    <spring:property name="resources" value="${mule.env}.yml" />
+  </spring:bean>
+</spring:beans>
 
 	<!-- ##### DB Connectors ##### -->
     <db:generic-config name="Borndigital" url="jdbc:postgresql://${borndigital.db.host}:${borndigital.db.port}/${borndigital.db.database}?password=${borndigital.db.password}&amp;user=${borndigital.db.username}" driverClassName="org.postgresql.Driver" doc:name="Borndigital DB"> 
