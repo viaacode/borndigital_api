@@ -18,7 +18,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <mule.version>3.7.4</mule.version>
+    <mule.version>3.9.0</mule.version>
     <mule.tools.version>1.2</mule.tools.version>
   </properties>
   <!-- Mule Dependencies -->
@@ -27,13 +27,6 @@
     <dependency>
       <groupId>com.mulesoft.muleesb</groupId>
       <artifactId>mule-core-ee</artifactId>
-      <version>${mule.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Xml configuration -->
-    <dependency>
-      <groupId>com.mulesoft.muleesb.modules</groupId>
-      <artifactId>mule-module-spring-config-ee</artifactId>
       <version>${mule.version}</version>
       <scope>provided</scope>
     </dependency>
