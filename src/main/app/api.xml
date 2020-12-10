@@ -9,9 +9,9 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 http://www.mulesoft.org/schema/mule/cors http://www.mulesoft.org/schema/mule/cors/current/mule-cors.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
     <http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="${api.port}" protocol="HTTPS" doc:name="HTTP Listener Configuration">
-        <tls:context>
-            <tls:key-store path="keystore.jks" password="password" keyPassword="password"/>
-        </tls:context>
+		<tls:context>
+			<tls:key-store type="jks" path="${keystore.location}" alias="${keystore.alias}" keyPassword="${keystore.key.password}" password="${keystore.password}"/>
+		</tls:context>
     </http:listener-config>
     <apikit:config name="api-config" raml="api.raml" consoleEnabled="true" doc:name="Router" consolePath="ingest/console"/>
     <cors:config name="Cors_Configuration" doc:name="Cors Configuration">
